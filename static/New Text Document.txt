@@ -1,0 +1,34 @@
+WITH mostRecentSessionPerUser AS (SELECT id, MAX(last_check_in_at) as mostRecent FROM sessions
+WHERE user_id = %s
+GROUP BY user_id
+),
+
+
+withStatus AS (SELECT status, user_id from mostRecentSessionPerUser
+JOIN sessions
+ON mostRecentSessionPerUser.id = sessions.id
+)
+
+SELECT * FROM withStatus
+JOIN users 
+ON users.id = withStatus.user_id
+ORDER BY status, firstname
+
+
+
+SELECT 
+    u.id AS user_id,
+    u.first_name,
+    u.last_name,
+    u.phone_number,
+    s.status AS most_recent_status,
+    s.last_check_in_at
+FROM users u
+LEFT JOIN LATERAL (
+    SELECT *
+    FROM sessions
+    WHERE user_id = u.id
+    ORDER BY last_check_in_at DESC NULLS LAST
+    LIMIT 1
+) s ON TRUE
+ORDER BY u.first_name;

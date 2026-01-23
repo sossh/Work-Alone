@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LSSD Work‑Alone Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+    }
+
+    /*--------- User Button Styling ---------*/
+    #user-list {
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .user-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 340px;
+      padding: 12px 14px;
+      margin: 3px 3px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      text-align: left;
+      transition: box-shadow 0.2s;
+    }
+
+    .user-card:hover {
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .user-header {
+      display: flex;
+      justify-content: space-between;
+      /* pushes phone to the right */
+      align-items: center;
+      width: 100%;
+    }
+
+    .user-name {
+      font-size: 1.1em;
+      font-weight: 600;
+    }
+
+    .user-phone {
+      color: #555;
+    }
+
+    .user-status {
+      font-weight: 700;
+      text-transform: capitalize;
+      margin-top: 3px;
+    }
+
+    .status-alert {
+      color: #b00020;
+    }
+
+    .status-active {
+      color: #2e7d32;
+    }
+
+    .status-inactive {
+      color: #546e7a;
+    }
+
+
+
+
+
+    #search {
+      margin-bottom: 10px;
+      width: 90%;
+      padding: 10px;
+      margin: 0 auto;
+      display: flex;
+    }
+
+    #new-user-btn {
+      display: block;
+      padding: 10px 40px;
+      font-size: 1rem;
+      background: #4877bd;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #new-user-btn:hover {
+      background: #354d94;
+    }
+
+    #refresh-btn {
+      font-size: 1rem;
+      background: #4877bd;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 10px 20px;
+    }
+
+    #refresh-btn:hover {
+      background: #354d94;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 10px auto;
+    }
+
+
+    /* ───────── User Details Dialog ───────── */
+    #user-details-dialog {
+      width: 900px;
+      max-width: 95vw;
+      border: none;
+      border-radius: 10px;
+      padding: 0;
+    }
+
+    .ud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid #eee;
+      background: #f9fafb;
+    }
+
+    .ud-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .ud-body {
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .ud-section h4 {
+      margin: 0 0 8px;
+    }
+
+    .ud-row {
+      margin: 6px 0;
+      color: #333;
+    }
+
+    .ud-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ud-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: .85rem;
+    }
+
+    .ud-chip.active {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .ud-chip.alert {
+      background: #fdecea;
+      color: #b00020;
+    }
+
+    .ud-chip.inactive {
+      background: #eceff1;
+      color: #546e7a;
+    }
+
+    .ud-list {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      max-height: 220px;
+      overflow: auto;
+    }
+
+    .ud-list-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .ud-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .ud-muted {
+      color: #6b7280;
+    }
+
+    .ud-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid #eee;
+      padding: 12px 16px;
+      background: #fafafa;
+    }
+
+    #message-log {
+      max-height: 280px;
+      overflow: auto;
+      border: 1px solid #eee;
+      border-radius: 8px;
+    }
+
+    .message-item {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .message-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-time {
+      color: #6b7280;
+      font-size: .85rem;
+      margin-right: 8px;
+    }
+
+    .activity-type {
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .activity-text {
+      color: #374151;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <h2>LSSD Work‑Alone Dashboard</h2>
+
+  <input id="search" placeholder="Search users...">
+
+  <div class="button-group">
+    <button id="new-user-btn">+ New User</button>
+    <button id="refresh-btn">↻</button>
+  </div>
+
+  <div id="user-list"></div>
+
+  <!-- Template for the user button -->
+  <template id="user-card-template">
+    <button class="user-card">
+
+      <div class="user-header">
+        <div class="user-name"></div>
+        <div class="user-phone"></div>
+      </div>
+
+      <div class="user-status"></div>
+
+    </button>
+  </template>
+
+
+  <!-- Add A New User Dialog Menu -->
+  <dialog id="new-user-menu">
+    <div id="new-user-content">
+
+      <h3>Create a New User</h3>
+      <h6>Phone Number should be in the format: +1 555 123 4567</h6>
+
+      <input id="new-user-fname" placeholder="First Name" required>
+      <input id="new-user-lname" placeholder="Last Name" required>
+      <input id="new-user-phone" placeholder="Phone number" required>
+      <input id="new-user-delay" placeholder="Delay Interval (Minutes)" required>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top: 12px;">
+        <button id="create-user-btn">Create</button>
+        <button id="cancel-new-user">Cancel</button>
+      </div>
+
+    </div>
+  </dialog>
+
+
+  <dialog id="user-details-dialog">
+    <div class="ud-header">
+      <div>
+        <div class="ud-title" id="ud-name">—</div>
+        <div class="ud-row">
+          <span id="ud-phone" class="ud-muted">—</span>
+          <span id="ud-status-chip" class="ud-chip inactive" style="margin-left:8px;">inactive</span>
+        </div>
+      </div>
+      <div class="ud-row">
+        <span id="ud-interval" class="ud-muted">Display Interval: —</span>
+      </div>
+      <div class="ud-actions">
+        <button id="ud-edit-btn">Edit</button>
+        <button id="ud-close-btn">Close</button>
+      </div>
+    </div>
+
+    <div class="ud-body">
+      <!-- Left: Contacts -->
+      <section class="ud-section">
+        <h4>Escalation Contacts</h4>
+        <div id="contacts-list" class="ud-list"></div>
+        <div style="margin-top:8px;">
+          <button id="ud-add-contact-btn">+ Add contact</button>
+        </div>
+      </section>
+
+      <!-- Right: Most recent session -->
+      <section class="ud-section">
+        <h4>Most Recent Session</h4>
+        <div id="recent-session" class="ud-list">
+          <div class="ud-list-item ud-muted">No session found.</div>
+        </div>
+
+        <h4 style="margin-top:12px;">Message Log</h4>
+        <div id="message-log"></div>
+      </section>
+    </div>
+
+    <div class="ud-footer">
+      <button id="ud-save-btn" style="display:none;">Save</button>
+    </div>
+  </dialog>
+
+
+  <dialog id="edit-user-dialog">
+    <div style="padding:20px; min-width:350px;">
+      <h3>Edit User</h3>
+      <h6>Phone Number should be in the format: +1 555 123 4567</h6>
+
+      <input id="edit-user-fname" placeholder="First Name">
+      <input id="edit-user-lname" placeholder="Last Name">
+      <input id="edit-user-phone" placeholder="Phone Number">
+      <input id="edit-user-delay" placeholder="Delay Interval (Minutes)">
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+        <button id="edit-user-save">Save</button>
+        <button id="edit-user-cancel">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+
+  <dialog id="new-contact-dialog">
+    <div style="padding:20px; min-width:350px;">
+      <h3>Add New Escalation Contact</h3>
+      <h6>Phone Number should be in the format: +1 555 123 4567</h6>
+
+      <input id="new-contact-fname" placeholder="First Name">
+      <input id="new-contact-lname" placeholder="Last Name">
+      <input id="new-contact-phone" placeholder="Phone Number">
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+        <button id="new-contact-save">Save</button>
+        <button id="new-contact-cancel">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="edit-contact-dialog">
+    <div style="padding:20px; min-width:350px;">
+      <h3>Edit Escalation Contact</h3>
+      <h6>Phone Number should be in the format: +1 555 123 4567</h6>
+
+      <input id="edit-contact-fname" placeholder="First Name">
+      <input id="edit-contact-lname" placeholder="Last Name">
+      <input id="edit-contact-phone" placeholder="Phone Number">
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+        <button id="edit-contact-save">Save</button>
+        <button id="edit-contact-cancel">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+  <template id="escalation-contact-card-template">
+    <div class="ud-list-item">
+      <div>
+        <div><strong class="contact-name"></strong></div>
+        <div class="ud-muted contact-phone"></div>
+      </div>
+      <div>
+        <button class="contact-remove">Remove</button>
+        <button class="contact-edit">Edit</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-activity-row">
+    <div class="activity-item">
+      <span class="activity-time"></span>
+      <span class="activity-type"></span>
+      <span class="activity-text"></span>
+    </div>
+  </template>
+
+
+
+
+
+
+
+</body>
+
+</html>
+
+<script>
+
+
+
+  //------------- Helper Functions -------------//
+
+  function _addUserCard(user) {
+
+    // Clone the template
+    const template = document.getElementById('user-card-template');
+    const card = template.content.cloneNode(true).querySelector('.user-card');;
+
+    card.querySelector('.user-name').textContent = user.first_name + " " + user.last_name;
+    card.querySelector('.user-phone').textContent = user.phone_number;
+    const statusElem = card.querySelector('.user-status');
+    if (!user.status) {
+      user.status = "inactive";
+    }
+    statusElem.textContent = user.status;
+    statusElem.classList.add(`status-${user.status}`);
+
+    // Make cards searchable
+    card.dataset.fname = user.first_name.toLowerCase();
+    card.dataset.lname = user.last_name.toLowerCase();
+    card.dataset.phone = String(user.phone_number).toLowerCase();
+    card.dataset.status = user.status.toLowerCase();
+
+
+    // Open the user details dialog page
+    card.addEventListener('click', () => openUserDetailsDialog(user.user_id));
+    // Add the Card to the user list
+    const list = document.getElementById('user-list');
+    list.insertBefore(card, list.firstChild);
+  }
+
+  function _isValidPhone(str) {
+    return /^\+?\d+$/.test(String(str));
+  }
+
+  function _normalizePhone(phone) {
+    const s = String(phone ?? '').trim();
+    // Remove spaces, dashes, parentheses, dots
+    const stripped = s.replace(/[\s().-]+/g, '');
+    return stripped.startsWith('+') ? stripped : `+${stripped}`;
+  }
+
+  async function _fetchJSON(url, opts) {
+    const results = await fetch(url, opts);
+    if (!results.ok) throw new Error(`Request failed: ${results.status}`);
+    return results.json();
+  }
+
+  // Called when "Create" Button pressed in the "Create a New User" dialog
+  async function createUser() {
+
+    const fname = document.getElementById("new-user-fname").value;
+    const lname = document.getElementById("new-user-lname").value;
+    const phone = _normalizePhone(document.getElementById("new-user-phone").value);
+    const delay = document.getElementById("new-user-delay").value;
+
+    // Make sure input is valid
+    if (!fname) {
+      alert("First name is required.");
+      return; // stop function
+    }
+    if (!lname) {
+      alert("Last name is required.");
+      return;
+    }
+    if (!_isValidPhone(phone)) {
+      alert("Please enter a valid phone number. ");
+      return;
+    }
+    if (/^\d+$/.test(delay) == false) {
+      alert("Please enter a valid delay interval in minutes (a number).");
+      return;
+    }
+    delayInt = parseInt(delay);
+    if (delayInt <= 0) {
+      alert("Please enter a delay interval greater than zero.");
+      return;
+    }
+
+    // reset fields
+    document.getElementById("new-user-fname").value = "";
+    document.getElementById("new-user-lname").value = "";
+    document.getElementById("new-user-phone").value = "";
+    document.getElementById("new-user-delay").value = "";
+
+    console.log("Creating user:", fname, lname, phone, delayInt);
+
+    // POST to server
+    const newUser = await _fetchJSON('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        first_name: fname,
+        last_name: lname,
+        phone_number: phone,
+        delay_interval: delayInt
+      })
+    });
+
+
+    // call YOUR function
+    _addUserCard({
+      user_id: String(newUser.user_id),
+      first_name: fname,
+      last_name: lname,
+      phone_number: phone,
+      status: "inactive",
+    });
+
+    // close the popup
+    document.getElementById("new-user-menu").close();
+
+
+
+
+
+  }
+
+  // Fetches data from the DB and displays it
+  async function displayUserCards() {
+    const users = await _fetchJSON('/api/users', {
+      method: 'GET'
+    });
+
+
+    document.getElementById('user-list').innerHTML = '';
+
+    // Itterate backwards so query order stays the same
+    for (let i = users.length - 1; i >= 0; i--) {
+      const user = users[i];
+      _addUserCard(user);
+    }
+
+  }
+
+  // Filters cached users
+  function searchUsers() {
+
+    const query = document.getElementById("search").value.toLowerCase();
+    const cards = document.querySelectorAll(".user-card");
+
+
+
+    cards.forEach(card => {
+      const fname = card.dataset.fname;
+      const lname = card.dataset.lname
+      const phone = card.dataset.phone;
+      const status = card.dataset.status;
+
+      // Check for matches
+      const matches =
+        fname.includes(query) ||
+        lname.includes(query) ||
+        phone.includes(query) ||
+        status.includes(query);
+
+      // Show or hide card
+      card.style.display = matches ? "flex" : "none";
+    });
+  }
+
+
+
+
+
+
+
+
+
+  // Show / Hide the Menu that displays the users details
+  async function openUserDetailsDialog(userId) {
+    console.log("Open details for user ID:", userId);
+    const dlg = document.getElementById('user-details-dialog');
+    dlg.showModal();
+
+
+
+    const user = await _fetchJSON(`/api/users/${userId}`)
+    renderUserHeader(user);
+    const contacts = await _fetchJSON(`/api/users/${userId}/contacts`)
+    renderContacts(contacts || []);
+    const recentSession = await _fetchJSON(`/api/users/${userId}/sessions/recent`)
+    renderRecentSession(recentSession || null);
+
+
+
+    // Setup the edit user button to edit this user:
+    const editBtn = document.getElementById('ud-edit-btn');
+    editBtn.onclick = () => openEditUserDialog(user);
+
+    // Setup the add contact button
+    const addContactBtn = document.getElementById('ud-add-contact-btn');
+    addContactBtn.onclick = () => openAddContactDialog(userId);
+
+
+  }
+
+  // Renders the user header section in the user details dialog menu
+  function renderUserHeader(user) {
+    document.getElementById('ud-name').textContent = user.first_name + " " + user.last_name;
+    document.getElementById('ud-phone').textContent = user.phone_number;
+    console.log("User status:", user.status);
+
+    const chip = document.getElementById('ud-status-chip');
+    chip.textContent = user.status || 'inactive';
+    chip.classList.remove('active', 'alert', 'inactive');
+    chip.classList.add((user.status || 'inactive').toLowerCase());
+    const interval = user.delay_interval || user.display_interval || '—';
+    document.getElementById('ud-interval').textContent = `Display Interval: ${interval} minute(s)`;
+  }
+
+  // Renders the contacts list in the user details dialog menu
+  function renderContacts(contacts) {
+    console.log("Rendering contacts:", contacts);
+    const host = document.getElementById('contacts-list');
+    host.innerHTML = '';
+    if (contacts.length === 0) {
+      host.innerHTML = '<div class="ud-list-item ud-muted">No contacts yet.</div>';
+      return;
+    }
+    const tpl = document.getElementById('escalation-contact-card-template');
+    contacts.forEach(c => {
+      const row = tpl.content.cloneNode(true);
+      row.querySelector('.contact-name').textContent = `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '(Unnamed)';
+      row.querySelector('.contact-phone').textContent = c.phone_number;
+      row.querySelector('.contact-edit').addEventListener('click', () => editContact(c));
+      row.querySelector('.contact-remove').addEventListener('click', () => removeContact(c));
+      host.appendChild(row);
+    });
+  }
+
+  // Renders the most recent session in the user details dialog menu
+  function renderRecentSession(s) {
+    console.log("Rendering recent session:", s);
+    const box = document.getElementById('recent-session');
+    box.innerHTML = '';
+    if (!s) {
+      box.innerHTML = '<div class="ud-list-item ud-muted">No session found.</div>';
+      return;
+    }
+    const status = s.status || 'active';
+    const started = s.started_at;
+    const ended = s.ended_at;
+
+    box.innerHTML = `
+    <div class="ud-list-item">
+      <div>
+        <div><strong>Last check‑in:</strong> ${s.last_check_in_at}</div>
+        <div><strong>Started:</strong> ${started}</div>
+        <div><strong>Ended:</strong> ${ended}</div>
+        
+      </div>
+    </div>`;
+  }
+
+  // Opens the edit user dialog menu (Lets you edit user details)
+  function openEditUserDialog(user) {
+    const dlg = document.getElementById("edit-user-dialog");
+
+    document.getElementById("edit-user-fname").value = user.first_name ?? "";
+    document.getElementById("edit-user-lname").value = user.last_name ?? "";
+    document.getElementById("edit-user-phone").value = user.phone_number ?? "";
+    document.getElementById("edit-user-delay").value = (user.delay_interval ?? user.display_interval ?? "").toString();
+
+    // Setup the save button to save changes
+    const saveBtn = document.getElementById("edit-user-save");
+    saveBtn.onclick = async () => {
+      const fname = document.getElementById("edit-user-fname").value.trim();
+      const lname = document.getElementById("edit-user-lname").value.trim();
+      const phone = _normalizePhone(document.getElementById("edit-user-phone").value.trim());
+      const delay = document.getElementById("edit-user-delay").value.trim();
+
+      if (!fname || !lname) { alert("First and last name required."); return; }
+      if (!_isValidPhone(phone)) { alert("Invalid phone number."); return; }
+      if (!/^\d+$/.test(delay)) { alert("Delay must be a number."); return; }
+
+      console.log("userid to edit:", user.id);
+      console.log("userid to edit:", user.user_id);
+      await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: fname,
+          last_name: lname,
+          phone_number: phone,
+          delay_interval: parseInt(delay, 10)
+        })
+      });
+
+      dlg.close();
+
+      await openUserDetailsDialog(user.id);
+    };
+
+
+    document.getElementById("edit-user-cancel").onclick = () => dlg.close();
+
+    dlg.showModal();
+
+  }
+
+  // Opens the add contact dialog menu (Lets you add a new contact)
+  function openAddContactDialog(userId) {
+    console.log("Open add contact dialog for user ID:", userId);
+    const dlg = document.getElementById("new-contact-dialog");
+
+    document.getElementById("new-contact-fname").value = "";
+    document.getElementById("new-contact-lname").value = "";
+    document.getElementById("new-contact-phone").value = "";
+
+    // Setup the save button to save changes
+    const saveBtn = document.getElementById("new-contact-save");
+    saveBtn.onclick = async () => {
+      const fname = document.getElementById("new-contact-fname").value.trim();
+      const lname = document.getElementById("new-contact-lname").value.trim();
+      const phone = _normalizePhone(document.getElementById("new-contact-phone").value.trim());
+
+      if (!fname || !lname) { alert("First and last name required."); return; }
+      if (!_isValidPhone(phone)) { alert("Invalid phone number."); return; }
+
+      await fetch(`/api/users/${userId}/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: fname,
+          last_name: lname,
+          phone_number: phone
+        })
+      });
+
+      dlg.close();
+
+      await openUserDetailsDialog(userId);
+    };
+
+    document.getElementById("new-contact-cancel").onclick = () => dlg.close();
+    dlg.showModal();
+  }
+
+  // Opens the edit contact dialog menu (Lets you edit contact details)
+  function editContact(contact) {
+    const dlg = document.getElementById("edit-contact-dialog");
+
+    document.getElementById("edit-contact-fname").value = contact.first_name || "";
+    document.getElementById("edit-contact-lname").value = contact.last_name || "";
+    document.getElementById("edit-contact-phone").value = contact.phone_number || "";
+
+    // Setup the save button to save changes
+    const saveBtn = document.getElementById("edit-contact-save");
+    saveBtn.onclick = async () => {
+      const fname = document.getElementById("edit-contact-fname").value.trim();
+      const lname = document.getElementById("edit-contact-lname").value.trim();
+      const phone = _normalizePhone(document.getElementById("edit-contact-phone").value.trim());
+      if (!fname || !lname) { alert("First and last name required."); return; }
+      if (!_isValidPhone(phone)) { alert("Invalid phone number."); return; }
+
+      // PATCH to server
+      await fetch(`/api/users/${contact.contact_of}/contacts/${contact.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: fname,
+          last_name: lname,
+          phone_number: phone
+        })
+      });
+      dlg.close();
+      await openUserDetailsDialog(contact.contact_of);
+
+    };
+
+    document.getElementById("edit-contact-cancel").onclick = () => dlg.close();
+    dlg.showModal();
+  }
+
+  // Removes a contact from their users contact list
+  async function removeContact(contact) {
+
+    console.log("Removing contact:", contact);
+    // Open Confirmation Dialog
+    if (!confirm(`Are you sure you want to remove contact: ${contact.first_name || ''} ${contact.last_name || ''}?`)) {
+      return;
+    }
+
+    if (!contact.id || !contact.contact_of) {
+      return;
+    }
+
+    // Try to delete contact
+    await fetch(`/api/users/${contact.contact_of}/contacts/${contact.id}`, {
+      method: "DELETE"
+    });
+
+    // Refresh contacts list
+    openUserDetailsDialog(contact.contact_of);
+
+  }
+
+
+
+
+
+
+
+
+
+  // Init Method
+  window.onload = () => {
+    console.log("Page Loaded");
+    user = { "first_name": "Bob", "last_name": "John", "phone": "123456789", "status": "active" }
+    displayUserCards();
+  };
+  
+
+//---------------------- UI Event Handlers ----------------------//
+
+  // Show / Hide the Create New User Menu
+  document.getElementById("new-user-btn").onclick = () => {
+    document.getElementById("new-user-fname").value = "";
+    document.getElementById("new-user-lname").value = "";
+    document.getElementById("new-user-phone").value = "";
+    document.getElementById("new-user-delay").value = "";
+    document.getElementById("new-user-menu").showModal();
+  };
+
+  document.getElementById("cancel-new-user").onclick = () => {
+    document.getElementById("new-user-menu").close();
+  };
+
+  document.getElementById("create-user-btn").onclick = () => createUser();
+
+  document.getElementById("search").addEventListener("input", searchUsers);
+
+  // Minimal edit placeholders
+  document.getElementById('ud-close-btn').addEventListener('click', () => {
+    document.getElementById('user-details-dialog').close();
+    displayUserCards();
+  });
+  document.getElementById('refresh-btn').addEventListener('click', () => {displayUserCards(); });
+
+  setInterval(displayUserCards, 60*1000)
+
+</script>
