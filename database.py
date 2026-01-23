@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import sqlite3
 import time
-from venv import logger
 
 
 import psycopg2

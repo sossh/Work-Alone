@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify, request, abort
-from SessionManager import PostgresLogger
+from logger import PostgresLogger
 
 from dotenv import load_dotenv
 

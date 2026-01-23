@@ -1,4 +1,4 @@
-from database import SqliteDatabase, PostgresDatabase
+from database import PostgresDatabase
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 
@@ -558,25 +558,5 @@ def _to_minutes(time:datetime):
     seconds = int(time.total_seconds())
     return seconds//60
 
-
-'''
-import os
-from dotenv import load_dotenv
-load_dotenv("auth.env")
-db_name = os.getenv("DB_NAME")
-db_user = os.getenv("DB_USER")
-db_password = os.getenv("DB_PASSWORD")
-db_host = os.getenv("DB_HOST")
-db_port = os.getenv("DB_PORT")
-logger = PostgresLogger(
-    host=db_host,
-    dbname=db_name,
-    user=db_user,
-    password=db_password,
-    port=db_port
-)
-
-print(logger.get_last_check_in(1))
-'''
 
 

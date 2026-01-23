@@ -1,7 +1,7 @@
 from messenger import Messenger
 from scheduler import Scheduler
 
-from SessionManager import Logger
+from logger import Logger
 from abc import ABC, abstractmethod
 
 
@@ -28,6 +28,7 @@ def extract_int(text: str):
     return int(num) if num else None
 
 
+# Maps a command to a handler
 class CommandMapper:
     def __init__(self, on_default:Command=None):
         self.commands = {}
@@ -65,7 +66,7 @@ class Command:
         pass
 
 
-# 
+# "info"
 class InfoCommand(Command):
     def __init__(self, messenger:Messenger):
         self.messenger = messenger

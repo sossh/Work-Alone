@@ -9,7 +9,7 @@ from scheduler import Scheduler
 from commands import CommandMapper, InfoCommand, BeginCommand, DoneCommand, ReplyCommand, SafeCommand
 from handler import TwilioHandler
 
-from SessionManager import PostgresLogger
+from logger import PostgresLogger
 
 
 app = Flask(__name__)
