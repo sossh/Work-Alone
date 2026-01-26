@@ -17,6 +17,7 @@ app = Flask(__name__)
 load_dotenv("auth.env")
 
 # Init the Messenger
+twilio_webhook_port = int(os.getenv("TWILIO_WEBHOOK_PORT"))
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
 default_from = os.getenv("TWILIO_DEFAULT_FROM")
@@ -71,7 +72,7 @@ def sms_webhook():
 
 
 
-app.run(debug=True)
+app.run(debug=True, port=twilio_webhook_port)
 
 
 
