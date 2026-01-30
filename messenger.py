@@ -19,7 +19,7 @@ class TwilioMessenger(Messenger):
         self.from_number = default_from
 
     def send_message(self, to: str, text: str) -> str:
-        if not to.startswith("+1") and len(to) != 11:
+        if not to.startswith("+1") or len(to) != 11:
             print("Invalid number format:", to)
             return ""  # Invalid number format
         message = self.twilio_client.messages.create(
@@ -30,7 +30,7 @@ class TwilioMessenger(Messenger):
         return message.sid
 
     def make_call(self, to: str, message: str) -> str:
-        if not to.startswith("+1") and len(to) != 11:
+        if not to.startswith("+1") or len(to) != 11:
             print("Invalid number format for call:", to)
             return ""  # Invalid number format
         call = self.twilio_client.calls.create(
